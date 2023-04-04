@@ -12,8 +12,17 @@ import java.util.Scanner;
 public class ImprovedChatCLientA {
 
     public static void main(String[] args){
-        new ImprovedChatCLientA().go();
+        Scanner scanner = new Scanner(System.in);
+        System.out.print("Enter your name : ");
+        String name = scanner.next();
+        new ImprovedChatCLientA(name).go();
     }
+
+    ImprovedChatCLientA(String name){
+        this.name = name;
+    }
+
+    String name;
     int portNo = 12345; //Server port to connect to
     Socket sock;
     PrintWriter printWriter;
@@ -27,7 +36,7 @@ public class ImprovedChatCLientA {
             IncomingReader incomingReader = new IncomingReader();
             Thread t1 = new Thread(incomingReader);
             t1.start();
-
+            sendMessages();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -35,22 +44,25 @@ public class ImprovedChatCLientA {
 
     void setUpNetworking() throws IOException{
         sock = new Socket("127.0.0.1", portNo);
-        System.out.println("Client A connected to server");
+        System.out.println(name + " connected to server");
 
         printWriter = new PrintWriter(sock.getOutputStream());
 
         inputStreamReader = new InputStreamReader(sock.getInputStream());
         bufferedReader = new BufferedReader(inputStreamReader);
-
-        sendMessages();
     }
 
     void sendMessages(){
+        Scanner sc;
+        String clientMessage;
         while(true) {
-            Scanner sc = new Scanner(System.in);
-            String clientMessage = sc.nextLine();
+            sc = new Scanner(System.in);
+            clientMessage = sc.nextLine();
 
-            printWriter.println("Client A : " + clientMessage);
+            if(clientMessage.equals("exit"))
+                break;
+
+            printWriter.println(name + " : " + clientMessage);
             printWriter.flush();
         }
     }
@@ -59,8 +71,9 @@ public class ImprovedChatCLientA {
         @Override
         public void run() {
             try {
-                while(bufferedReader.readLine()!=null){
-                   System.out.println(bufferedReader.readLine());
+                String msg;
+                while((msg = bufferedReader.readLine())!=null){
+                   System.out.println(msg);
                 }
             } catch (IOException ex){
                 ex.printStackTrace();
